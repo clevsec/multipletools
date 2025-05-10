@@ -1,0 +1,227 @@
+<style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+    .csc-camera-button-row{display:flex;justify-content:center;max-width:600px;margin:400px auto 20px;padding:0 20px}
+    .csc-camera-toggle-button{width:100%;padding:18px 30px;background:#000;border:2px solid #00ff00;border-radius:10px;color:#fff;font-size:2.4em;font-weight:700;cursor:pointer;text-align:center;transition:all .3s ease}
+    .csc-camera-toggle-button:hover{background:#00ff00;color:#000}
+    .csc-camera-container{background:#1a1a1a;border-radius:15px;box-shadow:0 6px 25px rgba(0,255,0,.15);padding:35px;max-width:600px;margin:20px auto;display:none;color:#fff}
+    .csc-camera-container h2{text-align:center;color:#00ff00;margin-bottom:25px;font-size:1.8em;font-weight:700}
+    .csc-camera-container label{display:block;margin:12px 0 6px;color:#fff;font-weight:500}
+    .csc-camera-container input,.csc-camera-container input[type=checkbox]{width:100%;padding:14px;margin-bottom:10px;border:1px solid #00ff00;border-radius:8px;background:#333;color:#fff;font-size:1em;transition:border-color .3s ease}
+    .csc-camera-container input[type=checkbox]{width:auto;margin-right:10px}
+    .csc-camera-container input:focus{outline:0;border-color:#00cc00;box-shadow:0 0 6px rgba(0,255,0,.4)}
+    .csc-camera-error{color:#ff4444;font-size:.85em;margin-bottom:10px;display:none}
+    .csc-camera-result{margin-top:20px;padding:15px;background:#333;border-radius:8px}
+    .csc-camera-result p{margin:10px 0;color:#00ff00;font-size:14px}
+    .csc-camera-canvas{display:block;margin:15px auto;border:1px solid #00ff00;border-radius:8px}
+    @media (max-width:480px){
+        .csc-camera-button-row{margin:350px auto 10px;padding:0 15px}
+        .csc-camera-toggle-button{font-size:2em;padding:14px 20px}
+        .csc-camera-container{padding:25px;margin:15px}
+        .csc-camera-container h2{font-size:1.5em}
+        .csc-camera-container input{font-size:.95em;padding:12px}
+        .csc-camera-result p{font-size:14px}
+    }
+</style>
+
+<div class="csc-camera-button-row">
+    <button class="csc-camera-toggle-button" onclick="cscCameraToggleCalculator()">Coverage Configuration</button>
+</div>
+<div class="csc-camera-container" id="cscCameraContainer">
+    <h2>Camera Coverage Calculator</h2>
+    <form id="cscCameraForm">
+        <label>Number of Doors</label>
+        <input type="number" id="cscCameraDoors" min="0" value="0" placeholder="Enter doors">
+        <p class="csc-camera-error" id="cscCameraDoorsError">Enter 0 or more</p>
+        <label>Number of Windows</label>
+        <input type="number" id="cscCameraWindows" min="0" value="0" placeholder="Enter windows">
+        <p class="csc-camera-error" id="cscCameraWindowsError">Enter 0 or more</p>
+        <label><input type="checkbox" id="cscCameraGarage"> Has Garage</label>
+        <label><input type="checkbox" id="cscCameraBackyard"> Has Backyard</label>
+        <div class="csc-camera-result" id="cscCameraResult">
+            <p><strong>Cameras Needed:</strong> <span id="cscCameraCount">0</span></p>
+            <p><strong>Why:</strong> <span id="cscCameraReason">Enter details to see recommendations</span></p>
+        </div>
+        <canvas id="cscCameraCanvas" class="csc-camera-canvas" width="100" height="100"></canvas>
+    </form>
+    <p style="text-align:center;margin-top:20px">
+        <a href="/contact" style="color:#00ff00;text-decoration:none">Need help? Contact us!</a>
+    </p>
+</div>
+
+<script>
+const cscCameraForm=document.getElementById("cscCameraForm"),cscCameraCanvas=document.getElementById("cscCameraCanvas"),cscCameraCtx=cscCameraCanvas.getContext("2d");function cscCameraValidateInput(){const e=document.getElementById("cscCameraDoors"),t=document.getElementById("cscCameraWindows"),a=document.getElementById("cscCameraDoorsError"),r=document.getElementById("cscCameraWindowsError"),c=parseInt(e.value),n=parseInt(t.value);return a.style.display=isNaN(c)||c<0?"block":"none",r.style.display=isNaN(n)||n<0?"block":"none",!(isNaN(c)||c<0||isNaN(n)||n<0)}function cscCameraDrawGrid(e,t,a,r){cscCameraCtx.clearRect(0,0,100,100),cscCameraCtx.fillStyle="#333",cscCameraCtx.fillRect(0,0,100,100),cscCameraCtx.strokeStyle="#fff",cscCameraCtx.lineWidth=2,cscCameraCtx.strokeRect(5,5,90,90),cscCameraCtx.fillStyle="#00ff00",cscCameraCtx.font="10px Arial",cscCameraCtx.textAlign="center",cscCameraCtx.textBaseline="middle";for(let c=0;c<e;c++){let n=20+60*(c/e);cscCameraCtx.beginPath(),cscCameraCtx.arc(n,10,4,0,2*Math.PI),cscCameraCtx.fill(),cscCameraCtx.fillStyle="#fff",cscCameraCtx.fillText(`D${c+1}`,n,10),cscCameraCtx.fillStyle="#00ff00"}for(let c=0;c<t;c++){let n=10+80*(c/t||1);cscCameraCtx.beginPath(),cscCameraCtx.arc(90,n,4,0,2*Math.PI),cscCameraCtx.fill(),cscCameraCtx.fillStyle="#fff",cscCameraCtx.fillText(`W${c+1}`,90,n),cscCameraCtx.fillStyle="#00ff00"}a&&(cscCameraCtx.beginPath(),cscCameraCtx.arc(10,90,4,0,2*Math.PI),cscCameraCtx.fill(),cscCameraCtx.fillStyle="#fff",cscCameraCtx.fillText("G",10,90),cscCameraCtx.fillStyle="#00ff00"),r&&(cscCameraCtx.beginPath(),cscCameraCtx.arc(90,90,4,0,2*Math.PI),cscCameraCtx.fill(),cscCameraCtx.fillStyle="#fff",cscCameraCtx.fillText("B1",90,90),cscCameraCtx.fillStyle="#00ff00",r>1&&(cscCameraCtx.beginPath(),cscCameraCtx.arc(80,90,4,0,2*Math.PI),cscCameraCtx.fill(),cscCameraCtx.fillStyle="#fff",cscCameraCtx.fillText("B2",80,90)))}function cscCameraCalculate(){if(!cscCameraValidateInput())return;const e=parseInt(document.getElementById("cscCameraDoors").value)||0,t=parseInt(document.getElementById("cscCameraWindows").value)||0,a=document.getElementById("cscCameraGarage").checked,r=document.getElementById("cscCameraBackyard").checked;let c=e+Math.ceil(t/2)+(a?1:0)+(r?1:0);r&&t+e>5&&(c+=1);let n=Math.max(1,c),o=[];e>0&&o.push(`${e} for door${e>1?"s":""}`),t>0&&o.push(`${Math.ceil(t/2)} for window${t>1?"s":""}`),a&&o.push("1 for garage"),r&&o.push(`${c-e-Math.ceil(t/2)-(a?1:0)} for backyard`),document.getElementById("cscCameraCount").textContent=n,document.getElementById("cscCameraReason").textContent=`NDAA-compliant system: ${o.join(", ")||"1 camera minimum"}.`,cscCameraDrawGrid(e,t,a,r&&1+(r&&t+e>5))}function cscCameraToggleCalculator(){const e=document.getElementById("cscCameraContainer"),t=document.querySelector(".csc-camera-toggle-button");""!==e.style.display&&"none"!==e.style.display?(e.style.display="none",t.textContent="Calculate Cameras"):(e.style.display="block",t.textContent="Done")}cscCameraForm.addEventListener("input",cscCameraCalculate),cscCameraCalculate();
+</script>
+
+<style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+    .csc-concerns-button-row{display:flex;justify-content:center;max-width:600px;margin:450px auto 20px;padding:0 20px}
+    .csc-concerns-toggle-button{width:100%;padding:18px 30px;background:#000;border:2px solid #00ff00;border-radius:10px;color:#fff;font-size:2.4em;font-weight:700;cursor:pointer;text-align:center;transition:all .3s ease}
+    .csc-concerns-toggle-button:hover{background:#00ff00;color:#000}
+    .csc-concerns-container{background:#1a1a1a;border-radius:15px;box-shadow:0 6px 25px rgba(0,255,0,.15);padding:35px;max-width:600px;margin:20px auto;display:none;color:#fff}
+    .csc-concerns-container h2{text-align:center;color:#00ff00;margin-bottom:25px;font-size:1.8em;font-weight:700}
+    .csc-concerns-container label{display:block;margin:12px 0 6px;color:#fff;font-weight:500}
+    .csc-concerns-container input,.csc-concerns-container select,.csc-concerns-container input[type=checkbox]{width:100%;padding:14px;margin-bottom:10px;border:1px solid #00ff00;border-radius:8px;background:#333;color:#fff;font-size:1em;transition:border-color .3s ease}
+    .csc-concerns-container input[type=checkbox]{width:auto;margin-right:10px}
+    .csc-concerns-container input:focus,.csc-concerns-container select:focus{outline:0;border-color:#00cc00;box-shadow:0 0 6px rgba(0,255,0,.4)}
+    .csc-concerns-error{color:#ff4444;font-size:.85em;margin-bottom:10px;display:none}
+    .csc-concerns-table{width:100%;border-collapse:collapse;margin:20px 0;background:#333;border-radius:8px}
+    .csc-concerns-table th,.csc-concerns-table td{padding:12px;border:1px solid #00ff00;text-align:left;color:#fff;font-size:.95em}
+    .csc-concerns-table th{background:#00ff00;color:#000;font-weight:700}
+    .csc-concerns-priority{list-style:none;padding:0;margin:20px 0}
+    .csc-concerns-priority li{margin:8px 0;color:#00ff00;font-size:.95em}
+    @media (max-width:480px){
+        .csc-concerns-button-row{margin:400px auto 10px;padding:0 15px}
+        .csc-concerns-toggle-button{font-size:2em;padding:14px 20px}
+        .csc-concerns-container{padding:25px;margin:15px}
+        .csc-concerns-container h2{font-size:1.5em}
+        .csc-concerns-container input,.csc-concerns-container select{font-size:.95em;padding:12px}
+        .csc-concerns-table th,.csc-concerns-table td{font-size:.9em;padding:10px}
+        .csc-concerns-priority li{font-size:.9em}
+    }
+</style>
+
+<div class="csc-concerns-button-row">
+    <button class="csc-concerns-toggle-button" onclick="cscConcernsToggleCalculator()">Pricing   Calculation</button>
+</div>
+<div class="csc-concerns-container" id="cscConcernsContainer">
+    <h2>Security Camera Installation Concerns</h2>
+    <form id="cscConcernsForm">
+        <label>Property Type</label>
+        <select id="cscConcernsPropertyType">
+            <option value="home">Home</option>
+            <option value="small_business">Small Business</option>
+            <option value="large_business">Large Business</option>
+        </select>
+        <label>Property Size (sq ft)</label>
+        <input type="number" id="cscConcernsSize" min="100" value="1000" placeholder="Enter square footage">
+        <p class="csc-concerns-error" id="cscConcernsSizeError">Enter 100 sq ft or more</p>
+        <label>Number of Spots to Cover</label>
+        <input type="number" id="cscConcernsSpots" min="0" value="0" placeholder="Enter spots">
+        <p class="csc-concerns-error" id="cscConcernsSpotsError">Enter 0 or more</p>
+        <label>Key Areas to Cover</label>
+        <label><input type="checkbox" id="cscConcernsDoors"> Doors</label>
+        <label><input type="checkbox" id="cscConcernsWindows"> Windows</label>
+        <label><input type="checkbox" id="cscConcernsGarage"> Garage</label>
+        <label><input type="checkbox" id="cscConcernsBackyard"> Backyard</label>
+        <label>When to Start Installation</label>
+        <select id="cscConcernsStart">
+            <option value="asap">ASAP</option>
+            <option value="month">Within 1 Month</option>
+            <option value="later">3+ Months</option>
+        </select>
+        <label><input type="checkbox" id="cscConcernsMobile"> Want Mobile App Access</label>
+        <label><input type="checkbox" id="cscConcernsInternet"> Internet Available</label>
+        <label>Camera Clarity</label>
+        <select id="cscConcernsClarity">
+            <option value="1080p">1080p</option>
+            <option value="5mp">5MP</option>
+            <option value="4k">4K</option>
+        </select>
+        <label>Budget Preference</label>
+        <select id="cscConcernsBudget">
+            <option value="low">Low (<$1,000)</option>
+            <option value="medium">Medium ($1,000–$3,000)</option>
+            <option value="high">High (>$3,000)</option>
+        </select>
+        <label><input type="checkbox" id="cscConcernsPrivacy"> Concerned about Privacy</label>
+        <label>Maintenance Preference</label>
+        <select id="cscConcernsMaintenance">
+            <option value="self">Self-Maintain</option>
+            <option value="professional">Professional Service</option>
+        </select>
+        <table class="csc-concerns-table">
+            <thead><tr><th>Concern</th><th>Recommendation</th></tr></thead>
+            <tbody id="cscConcernsTableBody"></tbody>
+        </table>
+        <p><strong>Priority List:</strong></p>
+        <ul class="csc-concerns-priority" id="cscConcernsPriority"></ul>
+    </form>
+    <p style="text-align:center;margin-top:20px">
+        <a href="/contact" style="color:#00ff00;text-decoration:none">Need a consultation? Contact us!</a>
+    </p>
+</div>
+
+<script>
+const cscConcernsForm=document.getElementById("cscConcernsForm");
+function cscConcernsValidateInput(){const e=document.getElementById("cscConcernsSize"),t=document.getElementById("cscConcernsSpots"),r=document.getElementById("cscConcernsSizeError"),a=document.getElementById("cscConcernsSpotsError"),c=parseInt(e.value),n=parseInt(t.value);return r.style.display=isNaN(c)||c<100?"block":"none",a.style.display=isNaN(n)||n<0?"block":"none",!(isNaN(c)||c<100||isNaN(n)||n<0)}
+function cscConcernsCalculate(){if(!cscConcernsValidateInput())return;const e=document.getElementById("cscConcernsPropertyType").value,t=parseInt(document.getElementById("cscConcernsSize").value)||100,r=parseInt(document.getElementById("cscConcernsSpots").value)||0,a=document.getElementById("cscConcernsDoors").checked,c=document.getElementById("cscConcernsWindows").checked,n=document.getElementById("cscConcernsGarage").checked,o=document.getElementById("cscConcernsBackyard").checked,s=document.getElementById("cscConcernsStart").value,i=document.getElementById("cscConcernsMobile").checked,l=document.getElementById("cscConcernsInternet").checked,d=document.getElementById("cscConcernsClarity").value,m=document.getElementById("cscConcernsBudget").value,u=document.getElementById("cscConcernsPrivacy").checked,p=document.getElementById("cscConcernsMaintenance").value;let g=0,h=0,C=a?1:0,f=c?1:0,y=n?1:0,b=o?1:0;t>5e3&&(b=o?2:0),g=Math.max(r,C+f+y+b),g=Math.max(1,g),h="home"===e?500:"small_business"===e?1e3:2e3,h+="1080p"===d?250*g:"5mp"===d?350*g:450*g,h="low"===m?.8*h:"high"===m?1.2*h:h;let v=g*(1+Math.random()/5),k=`${g} camera${1===g?"":"s"}`,T=`${Math.ceil(v)}–${Math.ceil(1.5*v)} hours`,x="Survey, mounting, wiring, configuration, testing.",S="asap"===s?"Begin within days if internet available.":"month"===s?"Scheduled within 30 days.":"Flexible planning.";l||(S+=" Offline systems available, limits mobile app."),S+=` ${k}, ${d} clarity.`,u||(S+=" Wide coverage."),i&&(S+=" Mobile app included."),u?S="Adjustable lenses, motion zones, signage.":S,i?S="self"===p?"App simplifies monthly lens cleaning, yearly storage checks.":"App with annual service (~$200/year).":S="self"===p?"Clean lenses monthly, check storage yearly.":"Annual service (~$200/year).";let w=[{concern:"Cost",recommend:`~$${Math.round(h)} for ${e.replace("_"," ")} (${t} sq ft, ${g} ${d} cameras).`},{concern:"Coverage",recommend:`${k} for ${r>0?`${r} spots`:""}${r&&(a||c||n||o)?", ":""}${a?"doors":""}${a&&(c||n||o)?", ":""}${c?"windows":""}${c&&(n||o)?", ":""}${n?"garage":""}${n&&o?", ":""}${o?"backyard":""}.`},{concern:"Installation",recommend:`${T}. Process: ${x} ${S}`},{concern:"Privacy",recommend:u?"Adjustable lenses, motion zones, signage for neighbors/family.":"Standard wide coverage."},{concern:"Maintenance",recommend:i?"self"===p?"App simplifies monthly lens cleaning, yearly storage checks.":"App with annual service (~$200/year).":"self"===p?"Clean lenses monthly, check storage yearly.":"Annual service (~$200/year)."}],I=["Coverage","Cost","Installation","Privacy","Maintenance"];"low"===m?I=["Cost","Coverage","Installation","Privacy","Maintenance"]:u?I=["Privacy","Coverage","Cost","Installation","Maintenance"]:r>5||t>5e3?I=["Coverage","Cost","Installation","Privacy","Maintenance"]:l||(I=["Installation","Coverage","Cost","Privacy","Maintenance"]),document.getElementById("cscConcernsTableBody").innerHTML=w.map(e=>`<tr><td>${e.concern}</td><td>${e.recommend}</td></tr>`).join(""),document.getElementById("cscConcernsPriority").innerHTML=I.map((e,t)=>`<li>${t+1}. ${e}</li>`).join("")}
+function cscConcernsToggleCalculator(){const e=document.getElementById("cscConcernsContainer"),t=document.querySelector(".csc-concerns-toggle-button");""!==e.style.display&&"none"!==e.style.display?(e.style.display="none",t.textContent="Address Concerns"):(e.style.display="block",t.textContent="Done")}cscConcernsForm.addEventListener("input",cscConcernsCalculate),cscConcernsCalculate();
+</script>
+
+<style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+    .csc-design-button-row{display:flex;justify-content:center;max-width:600px;margin:500px auto 20px;padding:0 20px}
+    .csc-design-toggle-button{width:100%;padding:18px 30px;background:#000;border:2px solid #00ff00;border-radius:10px;color:#fff;font-size:2.4em;font-weight:700;cursor:pointer;text-align:center;transition:all .3s ease}
+    .csc-design-toggle-button:hover{background:#00ff00;color:#000}
+    .csc-design-container{background:#1a1a1a;border-radius:15px;box-shadow:0 6px 25px rgba(0,255,0,.15);padding:35px;max-width:600px;margin:20px auto;display:none;color:#fff}
+    .csc-design-container h2{text-align:center;color:#00ff00;margin-bottom:25px;font-size:1.8em;font-weight:700}
+    .csc-design-container label{display:block;margin:12px 0 6px;color:#fff;font-weight:500}
+    .csc-design-container input,.csc-design-container select,.csc-design-container input[type=checkbox]{width:100%;padding:14px;margin-bottom:10px;border:1px solid #00ff00;border-radius:8px;background:#333;color:#fff;font-size:1em;transition:border-color .3s ease}
+    .csc-design-container input[type=checkbox]{width:auto;margin-right:10px}
+    .csc-design-container input:focus,.csc-design-container select:focus{outline:0;border-color:#00cc00;box-shadow:0 0 6px rgba(0,255,0,.4)}
+    .csc-design-error{color:#ff4444;font-size:.85em;margin-bottom:10px;display:none}
+    .csc-design-table{width:100%;border-collapse:collapse;margin:20px 0;background:#333;border-radius:8px}
+    .csc-design-table th,.csc-design-table td{padding:12px;border:1px solid #00ff00;text-align:left;color:#fff;font-size:.95em}
+    .csc-design-table th{background:#00ff00;color:#000;font-weight:700}
+    .csc-design-canvas{display:block;margin:15px auto;border:1px solid #00ff00;border-radius:8px}
+    @media (max-width:480px){
+        .csc-design-button-row{margin:450px auto 10px;padding:0 15px}
+        .csc-design-toggle-button{font-size:2em;padding:14px 20px}
+        .csc-design-container{padding:25px;margin:15px}
+        .csc-design-container h2{font-size:1.5em}
+        .csc-design-container input,.csc-design-container select{font-size:.95em;padding:12px}
+        .csc-design-table th,.csc-design-table td{font-size:.9em;padding:10px}
+    }
+</style>
+
+<div class="csc-design-button-row">
+    <button class="csc-design-toggle-button" onclick="cscDesignToggleCalculator()">Calculate Cameras Num </button>
+</div>
+<div class="csc-design-container" id="cscDesignContainer">
+    <h2>CCTV System Design Tool</h2>
+    <form id="cscDesignForm">
+        <label>Property Address</label>
+        <input type="text" id="cscDesignAddress" placeholder="e.g., 123 Main St, Cleveland, OH">
+        <p class="csc-design-error" id="cscDesignAddressError">Enter a valid address</p>
+        <label>Property Type</label>
+        <select id="cscDesignPropertyType">
+            <option value="home">Home</option>
+            <option value="small_business">Small Business</option>
+            <option value="large_business">Large Business</option>
+        </select>
+        <label>Property Size (sq ft)</label>
+        <input type="number" id="cscDesignSize" min="100" value="1000" placeholder="Enter square footage">
+        <p class="csc-design-error" id="cscDesignSizeError">Enter 100 sq ft or more</p>
+        <label>Number of Spots to Cover</label>
+        <input type="number" id="cscDesignSpots" min="0" value="0" placeholder="Enter spots">
+        <p class="csc-design-error" id="cscDesignSpotsError">Enter 0 or more</p>
+        <label>Key Areas to Cover</label>
+        <label><input type="checkbox" id="cscDesignDoors"> Doors</label>
+        <label><input type="checkbox" id="cscDesignWindows"> Windows</label>
+        <label><input type="checkbox" id="cscDesignGarage"> Garage</label>
+        <label><input type="checkbox" id="cscDesignBackyard"> Backyard</label>
+        <label>Camera Clarity</label>
+        <select id="cscDesignClarity">
+            <option value="1080p">1080p</option>
+            <option value="5mp">5MP</option>
+            <option value="4k">4K</option>
+        </select>
+        <label><input type="checkbox" id="cscDesignMobile"> Want Mobile App Access</label>
+        <table class="csc-design-table">
+            <thead><tr><th>Design Aspect</th><th>Details</th></tr></thead>
+            <tbody id="cscDesignTableBody"></tbody>
+        </table>
+        <canvas id="cscDesignCanvas" class="csc-design-canvas" width="100" height="100"></canvas>
+    </form>
+    <p style="text-align:center;margin-top:20px">
+        <a href="/contact" style="color:#00ff00;text-decoration:none">Ready to install? Contact us!</a>
+    </p>
+</div>
+
+<script>
+const cscDesignForm=document.getElementById("cscDesignForm"),cscDesignCanvas=document.getElementById("cscDesignCanvas"),cscDesignCtx=cscDesignCanvas.getContext("2d");
+function cscDesignValidateInput(){const e=document.getElementById("cscDesignAddress"),t=document.getElementById("cscDesignSize"),r=document.getElementById("cscDesignSpots"),a=document.getElementById("cscDesignAddressError"),c=document.getElementById("cscDesignSizeError"),n=document.getElementById("cscDesignSpotsError"),o=e.value.trim(),s=parseInt(t.value),i=parseInt(r.value);return a.style.display=o.length<5?"block":"none",c.style.display=isNaN(s)||s<100?"block":"none",n.style.display=isNaN(i)||i<0?"block":"none",o.length>=5&&!(isNaN(s)||s<100||isNaN(i)||i<0)}
+function cscDesignDrawGrid(e,t,r,a,c){cscDesignCtx.clearRect(0,0,100,100),cscDesignCtx.fillStyle="#333",cscDesignCtx.fillRect(0,0,100,100),cscDesignCtx.strokeStyle="#fff",cscDesignCtx.lineWidth=2,cscDesignCtx.strokeRect(5,5,90,90),cscDesignCtx.fillStyle="#00ff00",cscDesignCtx.font="10px Arial",cscDesignCtx.textAlign="center",cscDesignCtx.textBaseline="middle";for(let n=0;n<e;n++){let o=20+60*(n/e||1);cscDesignCtx.beginPath(),cscDesignCtx.arc(o,10,4,0,2*Math.PI),cscDesignCtx.fill(),cscDesignCtx.fillStyle="#fff",cscDesignCtx.fillText(`D${n+1}`,o,10),cscDesignCtx.fillStyle="#00ff00"}for(let n=0;n<t;n++){let e=10+80*(n/t||1);cscDesignCtx.beginPath(),cscDesignCtx.arc(90,e,4,0,2*Math.PI),cscDesignCtx.fill(),cscDesignCtx.fillStyle="#fff",cscDesignCtx.fillText(`W${n+1}`,90,e),cscDesignCtx.fillStyle="#00ff00"}r&&(cscDesignCtx.beginPath(),cscDesignCtx.arc(10,90,4,0,2*Math.PI),cscDesignCtx.fill(),cscDesignCtx.fillStyle="#fff",cscDesignCtx.fillText("G",10,90),cscDesignCtx.fillStyle="#00ff00"),a&&(cscDesignCtx.beginPath(),cscDesignCtx.arc(90,90,4,0,2*Math.PI),cscDesignCtx.fill(),cscDesignCtx.fillStyle="#fff",cscDesignCtx.fillText("B1",90,90),cscDesignCtx.fillStyle="#00ff00",a>1&&(cscDesignCtx.beginPath(),cscDesignCtx.arc(80,90,4,0,2*Math.PI),cscDesignCtx.fill(),cscDesignCtx.fillStyle="#fff",cscDesignCtx.fillText("B2",80,90)));for(let n=0;n<c;n++){let e=20+60*(n/c||1);cscDesignCtx.beginPath(),cscDesignCtx.arc(e,50,4,0,2*Math.PI),cscDesignCtx.fill(),cscDesignCtx.fillStyle="#fff",cscDesignCtx.fillText(`C${n+1}`,e,50),cscDesignCtx.fillStyle="#00ff00"}}
+function cscDesignCalculate(){if(!cscDesignValidateInput())return;const e=document.getElementById("cscDesignAddress").value,t=document.getElementById("cscDesignPropertyType").value,r=parseInt(document.getElementById("cscDesignSize").value)||100,a=parseInt(document.getElementById("cscDesignSpots").value)||0,c=document.getElementById("cscDesignDoors").checked,n=document.getElementById("cscDesignWindows").checked,o=document.getElementById("cscDesignGarage").checked,s=document.getElementById("cscDesignBackyard").checked,i=document.getElementById("cscDesignClarity").value,l=document.getElementById("cscDesignMobile").checked;let d=c?1:0,m=n?1:0,u=o?1:0,p=s?1:0;r>5e3&&(p=s?2:0);let g=Math.max(a,d+m+u+p),h=0,f=0;g=Math.max(1,g),h="home"===t?500:"small_business"===t?1e3:2e3,h+="1080p"===i?250*g:"5mp"===i?350*g:450*g;let y=`${g} camera${1===g?"":"s"}`,b=a>0?`${a} custom spot${a>1?"s":""}`:"";b+=b&&(c||n||o||s)?", ":"",b+=c?"doors":"",b+=c&&(n||o||s)?", ":"",b+=n?"windows":"",b+=n&&(o||s)?", ":"",b+=o?"garage":"",b+=o&&s?", ":"",b+=s?"backyard":"",f=g-d-m-u-p;let v=[{aspect:"Cameras",details:`${y} for ${b||"general coverage"}.`},{aspect:"Placement",details:`${c?"Doors (top)":""}${c&&(n||o||s||a)?", ":""}${n?"Windows (sides)":""}${n&&(o||s||a)?", ":""}${o?"Garage (bottom-left)":""}${o&&(s||a)?", ":""}${s?"Backyard (bottom-right)":""}${a?", ":""}${a?`${a} custom spots (center)`:""}.`},{aspect:"Cost",details:`~$${Math.round(h)} for ${t.replace("_"," ")} (${r} sq ft, ${y}).`},{aspect:"Specs",details:`${i.toUpperCase()} resolution${l?", mobile app for remote monitoring":""}.`}];document.getElementById("cscDesignTableBody").innerHTML=v.map(e=>`<tr><td>${e.aspect}</td><td>${e.details}</td></tr>`).join(""),cscDesignDrawGrid(d,m,o,p,f)}
+function cscDesignToggleCalculator(){const e=document.getElementById("cscDesignContainer"),t=document.querySelector(".csc-design-toggle-button");""!==e.style.display&&"none"!==e.style.display?(e.style.display="none",t.textContent="Design CCTV System"):(e.style.display="block",t.textContent="Done")}cscDesignForm.addEventListener("input",cscDesignCalculate),cscDesignCalculate();
+</script>
